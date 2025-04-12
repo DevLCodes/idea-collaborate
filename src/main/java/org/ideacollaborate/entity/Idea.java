@@ -3,7 +3,6 @@ package org.ideacollaborate.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -31,7 +30,7 @@ public class Idea {
     private List<String> tags = new ArrayList<>();
 
     @ManyToOne
-    private Employee owner;
+    private User owner;
 
     @CreationTimestamp
     private Date createdDate;
@@ -44,8 +43,8 @@ public class Idea {
     @JoinTable(
             name = "idea_interested_users",
             joinColumns = @JoinColumn(name = "idea_id"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<Employee> interestedCollaborators = new ArrayList<>();
+    private List<User> interestedCollaborators = new ArrayList<>();
 
 }

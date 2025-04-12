@@ -1,15 +1,18 @@
 package org.ideacollaborate.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.ideacollaborate.entity.Employee;
 import org.ideacollaborate.entity.Idea;
+import org.ideacollaborate.entity.IdeaDTO;
+import org.ideacollaborate.entity.User;
+import org.ideacollaborate.entity.UserDTO;
 import org.ideacollaborate.repository.IdeaRepository;
-import org.ideacollaborate.repository.EmployeeRepository;
+import org.ideacollaborate.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class IdeaService {
@@ -18,16 +21,19 @@ public class IdeaService {
     private IdeaRepository ideaRepository;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private UserRepository userRepository;
 
 
-    public Idea addIdea(final Idea idea,
-                        final Long employeeId) {
+    public IdeaDTO addIdea(final IdeaDTO ideaDTO,
+                        final Long userID) {
 
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + employeeId));
-        idea.setOwner(employee);
-        return ideaRepository.save(idea);
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userID));
+        Idea idea = ideaDTO.toIdea();
+        idea.setOwner(user);
+        Idea savedIdea = ideaRepository.save(idea);
+
+        return IdeaDTO.fromIdea(savedIdea);
     }
 
     public Idea voteIdea(final boolean upvote, final Long ideaId, final Long voterId) {
@@ -35,7 +41,7 @@ public class IdeaService {
         Idea idea = ideaRepository.findById(ideaId)
                 .orElseThrow(() -> new EntityNotFoundException("Idea not found with id: " + ideaId));
 
-        Employee employee = employeeRepository.findById(voterId)
+        User user = userRepository.findById(voterId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if(idea.getOwner().getId().equals(voterId)) {
@@ -58,28 +64,30 @@ public class IdeaService {
         return ideaRepository.findAll();
     }
 
-    public void expressCollaborationInterest(Long ideaId, Long employeeId) {
+    public void expressCollaborationInterest(Long ideaId, Long userId) {
         Idea idea = ideaRepository.findById(ideaId)
                 .orElseThrow(() -> new EntityNotFoundException("Idea not found"));
 
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        List<Employee> interestedCollaborators = idea.getInterestedCollaborators();
-        interestedCollaborators.add(employee);
+        List<User> interestedCollaborators = idea.getInterestedCollaborators();
+        interestedCollaborators.add(user);
         idea.setInterestedCollaborators(interestedCollaborators);
 
         ideaRepository.save(idea);
     }
 
-    public List<Employee> getInterestedCollaborators(Long ideaId, Long employeeId) {
+    public List<UserDTO> getInterestedCollaborators(Long ideaId, Long userId) {
         Idea idea = ideaRepository.findById(ideaId)
                 .orElseThrow(() -> new EntityNotFoundException("Idea not found"));
 
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        return idea.getInterestedCollaborators();
+        return idea.getInterestedCollaborators().stream()
+                .map(UserDTO::fromUser)
+                .collect(Collectors.toList());
 
 
     }
