@@ -65,3 +65,6 @@ curl --location --request POST 'http://localhost:8080/api/idea/1/expressInterest
 curl --location 'http://localhost:8080/api/idea/1/interestCollaborators?ideaId=1&userId=1' \
 --header 'Authorization: Bearer <token' \
 --header 'Cookie: JSESSIONID=AA53678D0964421408D83B9449C76B45'
+
+## Run the app
+./gradlew bootRun
