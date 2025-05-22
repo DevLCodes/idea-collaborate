@@ -68,3 +68,5 @@ curl --location 'http://localhost:8080/api/idea/1/interestCollaborators?ideaId=1
 
 ## Run the app
 ./gradlew bootRun
+
+PS: Keeping security key hardcoded to run it easier in different machines for now
